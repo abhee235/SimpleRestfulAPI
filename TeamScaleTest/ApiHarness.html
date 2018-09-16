@@ -1,0 +1,145 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <script src="Scripts/jquery-1.10.2.min.js"></script>
+    <script src="Scripts/bootstrap.js"></script>
+    <link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+</head>
+<body style="padding-left:50px;padding-right:50px">
+    <div class="container-fluid">
+        <h2>Personnel Records </h2>
+    <div>
+        Show <select id="selectOpt">
+            <option selected="selected" value="50">50</option>
+            <option value="100">100</option>
+            <option value="500">500</option>
+            
+        </select>
+        Showing <span id="lowerBound"><strong>1</strong></span> - <span id=upperBound><strong>50</strong></span> Records. 
+        <button id="previous" type="submit"><< Previous</button>&nbsp;
+        <button id="next" type="submit">Next >></button>
+        </div>
+    </br>
+        <table id="dataset" class="display table table-striped table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Edit</th>
+                    <th>Id</th>
+                    <th>Age</th>
+                    <th>Workclass</th>
+                    <th>Education</th>
+                    <th>Education Num</th>
+                    <th>Martial status</th>
+                    <th>Occupation</th>
+                    <th>RelationShip</th>
+                    <th>Race</th>
+                    <th>Sex</th>
+                    <th>capital_gain</th>
+                    <th>capital_loss</th>
+                    <th>Country</th>
+                    <th>over_50k</th>
+                    <th>hour-week</th>
+                </tr>
+            </thead>
+            <tbody id="dataget">
+            </tbody>
+        </table></div>
+        <script>
+            $(function () {
+                $('#previous').attr('disabled', 'disabled');
+                $('#selectOpt').change(function () {
+                    var lowerlimit = $('#lowerBound strong').html();
+                    var limit = $('#selectOpt').val();
+                    var nextUpperLimit = parseInt(lowerlimit) + parseInt(limit) - 1;
+                    $('#upperBound strong').html(nextUpperLimit);
+                    GetPagedReords(lowerlimit, limit)
+                });
+
+                $('#previous').click(function () {
+                    var uplimit = $('#upperBound strong').html();
+                    var lowerlimit = $('#lowerBound strong').html();
+                    var limit = $('#selectOpt').val();
+                    var nextUpperLimit = parseInt(lowerlimit) - 1;
+                    var nextLowerLimit = parseInt(lowerlimit) - limit;
+                    $('#lowerBound strong').html(nextLowerLimit);
+                    $('#upperBound strong').html(nextUpperLimit);
+                    if (nextLowerLimit <= 1) {
+                        $('#previous').attr('disabled', 'disabled');
+                        $('#lowerBound strong').html(1);
+                    }
+                    GetPagedReords(nextLowerLimit, limit)
+                });
+
+                $('#next').click(function(){
+                    var uplimit = $('#upperBound strong').html();
+                    var lowerlimit = $('#lowerBound strong').html();
+                    if (parseInt(lowerlimit) > 0) {
+                        $('#previous').attr('disabled',false);
+                    }
+                    var limit = $('#selectOpt').val();
+                    var nextLowerLimit = parseInt(uplimit) + 1;
+                    var nextUpperLimit = parseInt(uplimit) + parseInt(limit);
+                    $('#lowerBound strong').html(nextLowerLimit);
+                    $('#upperBound strong').html(nextUpperLimit);
+
+                    GetPagedReords(nextLowerLimit, limit)
+                });
+
+                $.get("api/records", function (data) {
+                    setData(data);
+                });
+               
+            });
+
+            function GetPagedReords(lower,upper)
+            {
+               
+                var param = 
+                {
+                    inbound: lower,
+                    limit : upper
+                }
+
+                $.ajax({
+                    url: "api/records",
+                    type: "GET",
+                    data: param,
+                    content: "application/json"
+                }).success(function (data) {
+                    setData(data);
+                });
+            }
+
+            function setData(data) {
+                $('#dataget').empty();
+                $.each(data, function (index, element) {
+                    $('#dataget').append(
+                        '<tr><td> <a href="Home/Edit/' + element['id'] + '">Edit</a></td>'
+                        + '<td>' + element['id'] + '</td>'
+                        + '<td>' + element['age'] + '</td>'
+                        + '<td>' + element['workClass'] + '</td>'
+                        + '<td>' + element['education'] + '</td>'
+                        + '<td>' + element['education_num'] + '</td>'
+                        + '<td>' + element['martial_status'] + '</td>'
+                        + '<td>' + element['Occupation'] + '</td>'
+                        + '<td>' + element['Relationship'] + '</td>'
+                        + '<td>' + element['Race'] + '</td>'
+                        + '<td>' + element['Sex'] + '</td>'
+                        + '<td>' + element['capital_gain'] + '</td>'
+                        + '<td>' + element['capital_loss'] + '</td>'
+                        + '<td>' + element['country'] + '</td>'
+                        + '<td>' + element['over_50k'] + '</td>'
+                        + '<td>' + element['hours_week'] + '</td></tr>'
+                        )
+                }
+               );
+                //$('#dataset').DataTable();
+            }
+        </script>
+</body>
+</html>
